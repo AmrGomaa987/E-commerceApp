@@ -65,6 +65,7 @@ class EnterPasswordPage extends StatelessWidget {
   Widget _passwordFiled(BuildContext context) {
     return TextField(
       controller: _passwordCon,
+      obscureText: true,
       decoration: InputDecoration(hintText: "Enter Password"),
     );
   }
@@ -74,15 +75,38 @@ class EnterPasswordPage extends StatelessWidget {
       builder: (context) {
         return BasicReactiveButton(
           onPressed: () {
-            signinReq.password = _passwordCon.text;
-            context.read<ButtonStateCubit>().execute(
-              usecase: SigninUseCase(),
-              params: UserSigninReq,
-            );
+            if (_validatePassword(context)) {
+              signinReq.password = _passwordCon.text;
+              context.read<ButtonStateCubit>().execute(
+                usecase: SigninUseCase(),
+                params: signinReq,
+              );
+            }
           },
-          title: "countinue",
+          title: "Continue",
         );
       },
+    );
+  }
+
+  bool _validatePassword(BuildContext context) {
+    final password = _passwordCon.text;
+
+    if (password.isEmpty) {
+      _showErrorSnackBar(context, 'Password is required');
+      return false;
+    }
+
+    return true;
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.red,
+      ),
     );
   }
 

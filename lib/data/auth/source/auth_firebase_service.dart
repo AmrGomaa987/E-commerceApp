@@ -18,6 +18,20 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService {
   @override
   Future<Either> signup(UserCreationReq user) async {
     try {
+      // Validate required fields
+      if (user.email == null || user.email!.isEmpty) {
+        return Left('Email is required');
+      }
+      if (user.password == null || user.password!.isEmpty) {
+        return Left('Password is required');
+      }
+      if (user.firstName == null || user.firstName!.isEmpty) {
+        return Left('First name is required');
+      }
+      if (user.lastName == null || user.lastName!.isEmpty) {
+        return Left('Last name is required');
+      }
+
       var returnedData = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
             email: user.email!,
@@ -36,12 +50,31 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService {
       return Right('sign up was successful');
     } on FirebaseAuthException catch (e) {
       String message = '';
-      if (e.code == 'weak-password') {
-        message = 'the password provided is too weak';
-      } else if (e.code == 'email-already-in-use') {
-        message = 'An account already exists with that email';
+      switch (e.code) {
+        case 'weak-password':
+          message = 'The password provided is too weak';
+          break;
+        case 'email-already-in-use':
+          message = 'An account already exists with that email';
+          break;
+        case 'invalid-email':
+          message = 'Invalid email address format';
+          break;
+        case 'operation-not-allowed':
+          message = 'Email/password accounts are not enabled';
+          break;
+        case 'network-request-failed':
+          message = 'Network error. Please check your connection';
+          break;
+        case 'too-many-requests':
+          message = 'Too many requests. Please try again later';
+          break;
+        default:
+          message = 'An error occurred during signup: ${e.message}';
       }
       return Left(message);
+    } catch (e) {
+      return Left('An unexpected error occurred. Please try again');
     }
   }
 
@@ -60,6 +93,14 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService {
   @override
   Future<Either> signin(UserSigninReq user) async {
     try {
+      // Validate required fields
+      if (user.email == null || user.email!.isEmpty) {
+        return Left('Email is required');
+      }
+      if (user.password == null || user.password!.isEmpty) {
+        return Left('Password is required');
+      }
+
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: user.email!,
         password: user.password!,
@@ -68,12 +109,34 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService {
       return Right('sign in was successful');
     } on FirebaseAuthException catch (e) {
       String message = '';
-      if (e.code == 'invalid-email') {
-        message = 'Not user found for that email';
-      } else if (e.code == 'invalid-credential') {
-        message = 'wrong passwodr porovided for that user ';
+      switch (e.code) {
+        case 'invalid-email':
+          message = 'Invalid email address format';
+          break;
+        case 'invalid-credential':
+          message = 'Invalid email or password';
+          break;
+        case 'user-not-found':
+          message = 'No user found for that email';
+          break;
+        case 'wrong-password':
+          message = 'Wrong password provided';
+          break;
+        case 'user-disabled':
+          message = 'This user account has been disabled';
+          break;
+        case 'too-many-requests':
+          message = 'Too many requests. Please try again later';
+          break;
+        case 'network-request-failed':
+          message = 'Network error. Please check your connection';
+          break;
+        default:
+          message = 'An error occurred during signin: ${e.message}';
       }
       return Left(message);
+    } catch (e) {
+      return Left('An unexpected error occurred. Please try again');
     }
   }
 
@@ -100,15 +163,14 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService {
   Future<Either> getUser() async {
     try {
       var currentUser = FirebaseAuth.instance.currentUser;
-      var userData =await FirebaseFirestore.instance
+      var userData = await FirebaseFirestore.instance
           .collection('Users')
           .doc(currentUser?.uid)
-          .get().then((value)=>value.data());
+          .get()
+          .then((value) => value.data());
       return Right(userData);
     } catch (e) {
-      return Left(
-        'plz try again'
-      );
+      return Left('plz try again');
     }
   }
 }

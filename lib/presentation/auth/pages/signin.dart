@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class SigninPage extends StatelessWidget {
-   SigninPage({super.key});
+  SigninPage({super.key});
   final TextEditingController _emailCon = TextEditingController();
 
   @override
@@ -41,20 +41,55 @@ class SigninPage extends StatelessWidget {
   Widget _emailFiled(BuildContext context) {
     return TextField(
       controller: _emailCon,
-      decoration: InputDecoration(hintText: "Enter Email"));
+      keyboardType: TextInputType.emailAddress,
+      autocorrect: false,
+      decoration: InputDecoration(hintText: "Enter Email"),
+    );
   }
 
   Widget _continueButton(BuildContext context) {
     return BasicAppButton(
       onPressed: () {
-        AppNavigator.push(
-          context,
-          EnterPasswordPage(
-            signinReq: UserSigninReq(email: _emailCon.text, ),
-          ),
-        );
+        if (_validateEmail(context)) {
+          AppNavigator.push(
+            context,
+            EnterPasswordPage(
+              signinReq: UserSigninReq(email: _emailCon.text.trim()),
+            ),
+          );
+        }
       },
-      title: "countinue",
+      title: "Continue",
+    );
+  }
+
+  bool _validateEmail(BuildContext context) {
+    final email = _emailCon.text.trim();
+
+    if (email.isEmpty) {
+      _showErrorSnackBar(context, 'Email is required');
+      return false;
+    }
+
+    if (!_isValidEmail(email)) {
+      _showErrorSnackBar(context, 'Please enter a valid email address');
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.red,
+      ),
     );
   }
 

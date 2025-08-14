@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ForgotPasswordPage extends StatelessWidget {
-   ForgotPasswordPage({super.key});
+  ForgotPasswordPage({super.key});
   final TextEditingController _emailCon = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,10 @@ class ForgotPasswordPage extends StatelessWidget {
   Widget _emailFiled(BuildContext context) {
     return TextField(
       controller: _emailCon,
-      decoration: InputDecoration(hintText: "Enter Email"));
+      keyboardType: TextInputType.emailAddress,
+      autocorrect: false,
+      decoration: InputDecoration(hintText: "Enter Email"),
+    );
   }
 
   Widget _continueButton() {
@@ -66,14 +69,46 @@ class ForgotPasswordPage extends StatelessWidget {
       builder: (context) {
         return BasicReactiveButton(
           onPressed: () {
-            context.read<ButtonStateCubit>().execute(
-              usecase: SendpasswordResetEmailUseCase(),
-              params: _emailCon.text
-            );
+            if (_validateEmail(context)) {
+              context.read<ButtonStateCubit>().execute(
+                usecase: SendpasswordResetEmailUseCase(),
+                params: _emailCon.text.trim(),
+              );
+            }
           },
-          title: "countinue",
+          title: "Continue",
         );
       },
+    );
+  }
+
+  bool _validateEmail(BuildContext context) {
+    final email = _emailCon.text.trim();
+
+    if (email.isEmpty) {
+      _showErrorSnackBar(context, 'Email is required');
+      return false;
+    }
+
+    if (!_isValidEmail(email)) {
+      _showErrorSnackBar(context, 'Please enter a valid email address');
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.red,
+      ),
     );
   }
 }
