@@ -1,6 +1,7 @@
 import 'package:ecommerce_app_with_flutter/presentation/home/widgets/categories.dart';
 import 'package:ecommerce_app_with_flutter/presentation/home/widgets/header.dart';
 import 'package:ecommerce_app_with_flutter/presentation/home/widgets/search_field.dart';
+import 'package:ecommerce_app_with_flutter/presentation/home/widgets/top_selling.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -12,12 +13,14 @@ class HomePage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Header(), 
+            Header(),
             SizedBox(height: 24),
             SearchField(),
-            SizedBox(height: 24,),
+            SizedBox(height: 24),
             Categories(),
-            ],
+            SizedBox(height: 24),
+            TopSelling(),
+          ],
         ),
       ),
     );

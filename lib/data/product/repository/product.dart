@@ -1,0 +1,28 @@
+import 'package:dartz/dartz.dart';
+import 'package:ecommerce_app_with_flutter/data/product/models/product.dart';
+import 'package:ecommerce_app_with_flutter/data/product/source/product_firebase_service.dart';
+import 'package:ecommerce_app_with_flutter/domain/product/repository/product.dart';
+import 'package:ecommerce_app_with_flutter/service_locator.dart';
+
+
+class ProductRepositoryImpl extends ProductRepository {
+
+
+  @override
+  Future<Either> getTopSelling() async {
+    var returnedData = await sl<ProductFirebaseService>().getTopSelling();
+    return returnedData.fold(
+      (error){
+        return Left(error);
+      }, 
+      (data){
+        return Right(
+          List.from(data).map((e) => ProductModel.fromMap(e).toEntity()).toList()
+        );
+      }
+    );
+  }
+  
+
+  
+}
