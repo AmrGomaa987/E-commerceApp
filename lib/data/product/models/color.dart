@@ -15,8 +15,26 @@ class ProductColorModel {
   factory ProductColorModel.fromMap(Map<String, dynamic> map) {
     return ProductColorModel(
       title: map['title'] as String? ?? '',
-      rgb: _parseRgbList(map['rgb']),
+      rgb: _parseColorData(map),
     );
+  }
+
+  static List<int> _parseColorData(Map<String, dynamic> map) {
+    try {
+      // Check if hexCode exists (new Firebase format)
+      if (map['hexCode'] != null) {
+        return _hexToRgb(map['hexCode'] as String);
+      }
+
+      // Fallback to rgb array (old format)
+      if (map['rgb'] != null) {
+        return _parseRgbList(map['rgb']);
+      }
+
+      return <int>[]; // No color data available
+    } catch (e) {
+      return <int>[]; // If parsing fails, return empty list
+    }
   }
 
   static List<int> _parseRgbList(dynamic rgbData) {
@@ -28,8 +46,28 @@ class ProductColorModel {
       }
       return <int>[];
     } catch (e) {
-      // If parsing fails, return empty list to prevent crashes
       return <int>[];
+    }
+  }
+
+  static List<int> _hexToRgb(String hexCode) {
+    try {
+      // Remove # if present
+      String hex = hexCode.replaceAll('#', '');
+
+      // Ensure hex is 6 characters
+      if (hex.length != 6) {
+        return <int>[]; // Invalid hex code
+      }
+
+      // Parse RGB values
+      int r = int.parse(hex.substring(0, 2), radix: 16);
+      int g = int.parse(hex.substring(2, 4), radix: 16);
+      int b = int.parse(hex.substring(4, 6), radix: 16);
+
+      return [r, g, b];
+    } catch (e) {
+      return <int>[]; // If parsing fails, return empty list
     }
   }
 }
