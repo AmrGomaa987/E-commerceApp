@@ -3,8 +3,8 @@ import 'package:dartz/dartz.dart';
 
 abstract class ProductFirebaseService {
   Future<Either> getTopSelling();
-  // Future<Either> getNewIn();
-  // Future<Either> getProductsByCategoryId(String categoryId);
+   Future<Either> getNewIn();
+  Future<Either> getProductsByCategoryId(String categoryId);
   // Future<Either> getProductsByTitle(String title);
   // Future<Either> addOrRemoveFavoriteProduct(ProductEntity product);
   // Future<bool> isFavorite(String productId);
@@ -28,5 +28,40 @@ class ProductFirebaseServiceImpl extends ProductFirebaseService {
       );
     }
   }
+  
+  @override
+  Future<Either> getNewIn() async {
+     try {
+      var returnedData = await FirebaseFirestore.instance.collection(
+        'Products'
+      ).where(
+        'createdDate',
+        isGreaterThanOrEqualTo: DateTime(2025,08,10)
+      ).get();
+      return Right(returnedData.docs.map((e) => e.data()).toList());
+    } catch (e) {
+      return const Left(
+        'Please try again'
+      );
+    }
+  }
+  
+  @override
+   Future<Either> getProductsByCategoryId(String categoryId) async {
+     try {
+      var returnedData = await FirebaseFirestore.instance.collection(
+        'Products'
+      ).where(
+        'categoryId',
+        isEqualTo: categoryId
+      ).get();
+      return Right(returnedData.docs.map((e) => e.data()).toList());
+    } catch (e) {
+      return const Left(
+        'Please try again'
+      );
+    }
+  }
+
 
 }
