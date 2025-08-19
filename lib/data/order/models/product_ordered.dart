@@ -24,25 +24,23 @@ class ProductOrderedModel {
     required this.totalPrice,
     required this.productImage,
     required this.createdDate,
-    required this.id
+    required this.id,
   });
-
 
   factory ProductOrderedModel.fromMap(Map<String, dynamic> map) {
     return ProductOrderedModel(
-      productId: map['productId'] as String,
-      productTitle: map['productTitle'] as String,
-      productQuantity: map['productQuantity'] as int,
-      productColor: map['productColor'] as String,
-      productSize: map['productSize'] as String,
-      productPrice: map['productPrice'] as double,
-      totalPrice: map['totalPrice'] as double,
-      productImage: map['productImage'] as String,
-      createdDate: map['createdDate'] as String,
-      id: map['id'] as String,
+      productId: map['productId'] as String? ?? '',
+      productTitle: map['productTitle'] as String? ?? '',
+      productQuantity: map['productQuantity'] as int? ?? 0,
+      productColor: map['productColor'] as String? ?? '',
+      productSize: map['productSize'] as String? ?? '',
+      productPrice: (map['productPrice'] as num?)?.toDouble() ?? 0.0,
+      totalPrice: (map['totalPrice'] as num?)?.toDouble() ?? 0.0,
+      productImage: map['productImage'] as String? ?? '',
+      createdDate: map['createdDate'] as String? ?? '',
+      id: map['id'] as String? ?? '',
     );
   }
-
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -58,22 +56,21 @@ class ProductOrderedModel {
       'id': id,
     };
   }
-
 }
 
 extension ProductOrderedXModel on ProductOrderedModel {
   ProductOrderedEntity toEntity() {
     return ProductOrderedEntity(
-      productId: productId, 
-      productTitle: productTitle, 
-      productQuantity: productQuantity, 
-      productColor: productColor, 
-      productSize: productSize, 
-      productPrice: productPrice, 
-      totalPrice: totalPrice, 
-      productImage: productImage, 
+      productId: productId,
+      productTitle: productTitle,
+      productQuantity: productQuantity,
+      productColor: productColor,
+      productSize: productSize,
+      productPrice: productPrice,
+      totalPrice: totalPrice,
+      productImage: productImage,
       createdDate: createdDate,
-      id: id
+      id: id,
     );
   }
 }
@@ -81,16 +78,16 @@ extension ProductOrderedXModel on ProductOrderedModel {
 extension ProductOrderedXEntity on ProductOrderedEntity {
   ProductOrderedModel fromEntity() {
     return ProductOrderedModel(
-      productId: productId, 
-      productTitle: productTitle, 
-      productQuantity: productQuantity, 
-      productColor: productColor, 
-      productSize: productSize, 
-      productPrice: productPrice, 
-      totalPrice: totalPrice, 
-      productImage: productImage, 
+      productId: productId,
+      productTitle: productTitle,
+      productQuantity: productQuantity,
+      productColor: productColor,
+      productSize: productSize,
+      productPrice: productPrice,
+      totalPrice: totalPrice,
+      productImage: productImage,
       createdDate: createdDate,
-      id: id
+      id: id,
     );
   }
 }
