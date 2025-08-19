@@ -2,6 +2,8 @@ import 'package:ecommerce_app_with_flutter/data/auth/repository/auth_repository_
 import 'package:ecommerce_app_with_flutter/data/auth/source/auth_firebase_service.dart';
 import 'package:ecommerce_app_with_flutter/data/category/repository/category.dart';
 import 'package:ecommerce_app_with_flutter/data/category/source/category_firebase_service.dart';
+import 'package:ecommerce_app_with_flutter/data/order/repository/order.dart';
+import 'package:ecommerce_app_with_flutter/data/order/source/order_firebase_service.dart';
 import 'package:ecommerce_app_with_flutter/data/product/repository/product.dart';
 import 'package:ecommerce_app_with_flutter/data/product/source/product_firebase_service.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/repository/auth.dart';
@@ -13,6 +15,10 @@ import 'package:ecommerce_app_with_flutter/domain/auth/usecases/signin.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/usecases/signup.dart';
 import 'package:ecommerce_app_with_flutter/domain/category/repository/category.dart';
 import 'package:ecommerce_app_with_flutter/domain/category/usecases/get_categories.dart';
+import 'package:ecommerce_app_with_flutter/domain/order/repository/order.dart';
+import 'package:ecommerce_app_with_flutter/domain/order/usecases/add_to_cart.dart';
+import 'package:ecommerce_app_with_flutter/domain/order/usecases/get_cart_products.dart';
+import 'package:ecommerce_app_with_flutter/domain/order/usecases/remove_cart_product.dart';
 import 'package:ecommerce_app_with_flutter/domain/product/repository/product.dart';
 import 'package:ecommerce_app_with_flutter/domain/product/usecases/get_new_in.dart';
 import 'package:ecommerce_app_with_flutter/domain/product/usecases/get_products_by_category_id.dart';
@@ -28,11 +34,17 @@ Future<void> initializeDependancies() async {
      sl.registerSingleton<ProductFirebaseService>(
     ProductFirebaseServiceImpl()
   );
+    sl.registerSingleton<OrderFirebaseService>(
+    OrderFirebaseServiceImpl()
+  );
   //repositry
   sl.registerSingleton<AuthRepositry>(AuthRepositoryImpl());
   sl.registerSingleton<CategoryRepository>(CategoryRepositoryImpl());
     sl.registerSingleton<ProductRepository>(
     ProductRepositoryImpl()
+  );
+    sl.registerSingleton<OrderRepository>(
+    OrderRepositoryImpl()
   );
   //usecase
   sl.registerSingleton<SignupUseCase>(SignupUseCase());
@@ -55,5 +67,14 @@ Future<void> initializeDependancies() async {
   );
     sl.registerSingleton<GetProductsByTitleUseCase>(
     GetProductsByTitleUseCase()
+  );
+    sl.registerSingleton<AddToCartUseCase>(
+    AddToCartUseCase()
+  );
+  sl.registerSingleton<GetCartProductsUseCase>(
+    GetCartProductsUseCase()
+  );
+    sl.registerSingleton<RemoveCartProductUseCase>(
+    RemoveCartProductUseCase()
   );
 }
