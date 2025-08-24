@@ -33,17 +33,20 @@ class AuthRepositoryImpl extends AuthRepositry {
   }
 
   @override
-  Future < Either > getUser() async {
-    var user = await sl < AuthFirebaseService > ().getUser();
+  Future<Either> getUser() async {
+    var user = await sl<AuthFirebaseService>().getUser();
     return user.fold(
       (error) {
         return Left(error);
       },
       (data) {
-        return Right(
-          UserModel.fromMap(data).toEntity()
-        );
-      }
+        return Right(UserModel.fromMap(data).toEntity());
+      },
     );
+  }
+
+  @override
+  Future<Either> logout() async {
+    return await sl<AuthFirebaseService>().logout();
   }
 }

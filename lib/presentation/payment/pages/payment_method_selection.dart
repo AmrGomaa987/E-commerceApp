@@ -1,4 +1,5 @@
 import 'package:ecommerce_app_with_flutter/common/helpr/navigator/app_navigator.dart';
+import 'package:ecommerce_app_with_flutter/common/helpr/product/product_price.dart';
 import 'package:ecommerce_app_with_flutter/common/widget/appbar/app_bar.dart';
 import 'package:ecommerce_app_with_flutter/common/widget/button/basic_app_button.dart';
 import 'package:ecommerce_app_with_flutter/core/configs/theme/app_colors.dart';
@@ -170,7 +171,7 @@ class _PaymentMethodSelectionPageState
                 style: const TextStyle(fontSize: 14),
               ),
               Text(
-                '\$${widget.totalAmount.toStringAsFixed(2)}',
+                ProductPriceHelper.formatPriceWithCurrency(widget.totalAmount),
                 style: const TextStyle(fontSize: 14),
               ),
             ],
@@ -192,7 +193,7 @@ class _PaymentMethodSelectionPageState
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
-                '\$${widget.totalAmount.toStringAsFixed(2)}',
+                ProductPriceHelper.formatPriceWithCurrency(widget.totalAmount),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

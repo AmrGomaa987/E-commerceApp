@@ -6,9 +6,22 @@ import 'package:ecommerce_app_with_flutter/presentation/auth/pages/signup.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class SigninPage extends StatelessWidget {
-  SigninPage({super.key});
+class SigninPage extends StatefulWidget {
+  const SigninPage({super.key});
+
+  @override
+  State<SigninPage> createState() => _SigninPageState();
+}
+
+class _SigninPageState extends State<SigninPage> {
   final TextEditingController _emailCon = TextEditingController();
+  String? _emailError;
+
+  @override
+  void dispose() {
+    _emailCon.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,14 +56,18 @@ class SigninPage extends StatelessWidget {
       controller: _emailCon,
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
-      decoration: InputDecoration(hintText: "Enter Email"),
+      onChanged: (value) => _validateEmail(value),
+      decoration: InputDecoration(
+        hintText: "Enter Email",
+        errorText: _emailError,
+      ),
     );
   }
 
   Widget _continueButton(BuildContext context) {
     return BasicAppButton(
       onPressed: () {
-        if (_validateEmail(context)) {
+        if (_isFormValid()) {
           AppNavigator.push(
             context,
             EnterPasswordPage(
@@ -63,34 +80,24 @@ class SigninPage extends StatelessWidget {
     );
   }
 
-  bool _validateEmail(BuildContext context) {
-    final email = _emailCon.text.trim();
-
-    if (email.isEmpty) {
-      _showErrorSnackBar(context, 'Email is required');
-      return false;
-    }
-
-    if (!_isValidEmail(email)) {
-      _showErrorSnackBar(context, 'Please enter a valid email address');
-      return false;
-    }
-
-    return true;
+  void _validateEmail(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        _emailError = 'Email is required';
+      } else if (!_isValidEmailFormat(value.trim())) {
+        _emailError = 'Please enter a valid email address';
+      } else {
+        _emailError = null;
+      }
+    });
   }
 
-  bool _isValidEmail(String email) {
+  bool _isFormValid() {
+    return _emailError == null && _emailCon.text.trim().isNotEmpty;
+  }
+
+  bool _isValidEmailFormat(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-  }
-
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.red,
-      ),
-    );
   }
 
   Widget _createAcount(BuildContext context) {

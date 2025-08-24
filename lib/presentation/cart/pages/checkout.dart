@@ -1,5 +1,6 @@
 import 'package:ecommerce_app_with_flutter/common/helpr/cart/cart.dart';
 import 'package:ecommerce_app_with_flutter/common/helpr/navigator/app_navigator.dart';
+import 'package:ecommerce_app_with_flutter/common/helpr/product/product_price.dart';
 import 'package:ecommerce_app_with_flutter/common/widget/appbar/app_bar.dart';
 import 'package:ecommerce_app_with_flutter/common/widget/button/basic_app_button.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/entity/user.dart';
@@ -22,6 +23,10 @@ class _CheckOutPageState extends State<CheckOutPage> {
   final TextEditingController _addressCon = TextEditingController();
   final TextEditingController _phoneCon = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  // Validation state
+  String? _phoneError;
+  String? _addressError;
 
   @override
   void dispose() {
@@ -105,39 +110,31 @@ class _CheckOutPageState extends State<CheckOutPage> {
   }
 
   Widget _buildPhoneField() {
-    return TextFormField(
+    return TextField(
       controller: _phoneCon,
       keyboardType: TextInputType.phone,
-      decoration: const InputDecoration(
+      onChanged: (value) => _validatePhone(value),
+      decoration: InputDecoration(
         labelText: 'Phone Number',
         hintText: '+20 123 456 7890',
         prefixIcon: Icon(Icons.phone),
+        errorText: _phoneError,
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your phone number';
-        }
-        return null;
-      },
     );
   }
 
   Widget _buildAddressField() {
-    return TextFormField(
+    return TextField(
       controller: _addressCon,
       minLines: 2,
       maxLines: 4,
-      decoration: const InputDecoration(
+      onChanged: (value) => _validateAddress(value),
+      decoration: InputDecoration(
         labelText: 'Shipping Address',
         hintText: 'Enter your complete address',
         prefixIcon: Icon(Icons.location_on),
+        errorText: _addressError,
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your shipping address';
-        }
-        return null;
-      },
     );
   }
 
@@ -161,7 +158,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Items (${widget.products.length})'),
-              Text('\$${total.toStringAsFixed(2)}'),
+              Text(ProductPriceHelper.formatPriceWithCurrency(total)),
             ],
           ),
           const SizedBox(height: 8),
@@ -181,7 +178,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                '\$${total.toStringAsFixed(2)}',
+                ProductPriceHelper.formatPriceWithCurrency(total),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -192,7 +189,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
   }
 
   void _proceedToPayment(UserEntity user) {
-    if (_formKey.currentState!.validate()) {
+    if (_isFormValid()) {
       final total = CartHelper.calculateCartSubtotal(widget.products);
 
       AppNavigator.push(
@@ -208,5 +205,33 @@ class _CheckOutPageState extends State<CheckOutPage> {
         ),
       );
     }
+  }
+
+  // Validation methods
+  void _validatePhone(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        _phoneError = 'Please enter your phone number';
+      } else {
+        _phoneError = null;
+      }
+    });
+  }
+
+  void _validateAddress(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        _addressError = 'Please enter your shipping address';
+      } else {
+        _addressError = null;
+      }
+    });
+  }
+
+  bool _isFormValid() {
+    return _phoneError == null &&
+        _addressError == null &&
+        _phoneCon.text.trim().isNotEmpty &&
+        _addressCon.text.trim().isNotEmpty;
   }
 }

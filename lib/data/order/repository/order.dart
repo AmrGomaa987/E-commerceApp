@@ -5,77 +5,87 @@ import 'package:ecommerce_app_with_flutter/data/order/models/order_registration_
 import 'package:ecommerce_app_with_flutter/data/order/models/product_ordered.dart';
 import 'package:ecommerce_app_with_flutter/data/order/source/order_firebase_service.dart';
 import 'package:ecommerce_app_with_flutter/domain/order/repository/order.dart';
+import 'package:ecommerce_app_with_flutter/domain/order/usecases/update_cart_quantity.dart';
 import 'package:ecommerce_app_with_flutter/service_locator.dart';
 
-
 class OrderRepositoryImpl extends OrderRepository {
-
-
   @override
   Future<Either> addToCart(AddToCartReq addToCartReq) async {
     return sl<OrderFirebaseService>().addToCart(addToCartReq);
   }
-  
+
   @override
   Future<Either> getCartProducts() async {
     var returnedData = await sl<OrderFirebaseService>().getCartProducts();
     return returnedData.fold(
-      (error){
+      (error) {
         return Left(error);
-      }, 
-      (data){
+      },
+      (data) {
         return Right(
-          List.from(data).map((e) => ProductOrderedModel.fromMap(e).toEntity()).toList()
+          List.from(
+            data,
+          ).map((e) => ProductOrderedModel.fromMap(e).toEntity()).toList(),
         );
-      }
+      },
     );
   }
-  
+
   @override
   Future<Either> removeCartProduct(String id) async {
     var returnedData = await sl<OrderFirebaseService>().removeCartProduct(id);
     return returnedData.fold(
-      (error){
+      (error) {
         return Left(error);
-      }, 
-      (message){
-        return Right(
-          message
-        );
-      }
+      },
+      (message) {
+        return Right(message);
+      },
+    );
+  }
+
+  @override
+  Future<Either> updateCartQuantity(UpdateCartQuantityParams params) async {
+    var returnedData = await sl<OrderFirebaseService>().updateCartQuantity(
+      params,
+    );
+    return returnedData.fold(
+      (error) {
+        return Left(error);
+      },
+      (message) {
+        return Right(message);
+      },
     );
   }
 
   @override
   Future<Either> orderRegistration(OrderRegistrationReq order) async {
-    var returnedData = await sl<OrderFirebaseService>().orderRegistration(order);
+    var returnedData = await sl<OrderFirebaseService>().orderRegistration(
+      order,
+    );
     return returnedData.fold(
-      (error){
+      (error) {
         return Left(error);
-      }, 
-      (message){
-        return Right(
-          message
-        );
-      }
+      },
+      (message) {
+        return Right(message);
+      },
     );
   }
-  
 
-  
   @override
   Future<Either> getOrders() async {
-   var returnedData = await sl<OrderFirebaseService>().getOrders();
+    var returnedData = await sl<OrderFirebaseService>().getOrders();
     return returnedData.fold(
-      (error){
+      (error) {
         return Left(error);
-      }, 
-      (data){
+      },
+      (data) {
         return Right(
-          List.from(data).map((e) => OrderModel.fromMap(e).toEntity()).toList()
+          List.from(data).map((e) => OrderModel.fromMap(e).toEntity()).toList(),
         );
-      }
+      },
     );
   }
-  
 }

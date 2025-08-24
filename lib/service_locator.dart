@@ -12,6 +12,7 @@ import 'package:ecommerce_app_with_flutter/domain/auth/repository/auth.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/usecases/get_ages.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/usecases/get_user.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/usecases/is_logged_in.dart';
+import 'package:ecommerce_app_with_flutter/domain/auth/usecases/logout.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/usecases/send_password_reset_email.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/usecases/signin.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/usecases/signup.dart';
@@ -23,6 +24,7 @@ import 'package:ecommerce_app_with_flutter/domain/order/usecases/get_cart_produc
 import 'package:ecommerce_app_with_flutter/domain/order/usecases/get_orders.dart';
 import 'package:ecommerce_app_with_flutter/domain/order/usecases/order_registration.dart';
 import 'package:ecommerce_app_with_flutter/domain/order/usecases/remove_cart_product.dart';
+import 'package:ecommerce_app_with_flutter/domain/order/usecases/update_cart_quantity.dart';
 import 'package:ecommerce_app_with_flutter/domain/payment/repository/payment_repository.dart';
 import 'package:ecommerce_app_with_flutter/domain/payment/usecases/process_payment.dart';
 import 'package:ecommerce_app_with_flutter/domain/product/repository/product.dart';
@@ -68,6 +70,7 @@ Future<void> initializeDependancies() async {
   sl.registerSingleton<AddToCartUseCase>(AddToCartUseCase());
   sl.registerSingleton<GetCartProductsUseCase>(GetCartProductsUseCase());
   sl.registerSingleton<RemoveCartProductUseCase>(RemoveCartProductUseCase());
+  sl.registerSingleton<UpdateCartQuantityUseCase>(UpdateCartQuantityUseCase());
   sl.registerSingleton<OrderRegistrationUseCase>(OrderRegistrationUseCase());
   sl.registerSingleton<AddOrRemoveFavoriteProductUseCase>(
     AddOrRemoveFavoriteProductUseCase(),
@@ -78,4 +81,5 @@ Future<void> initializeDependancies() async {
   );
   sl.registerSingleton<GetOrdersUseCase>(GetOrdersUseCase());
   sl.registerSingleton<ProcessPaymentUseCase>(ProcessPaymentUseCase());
+  sl.registerSingleton<LogoutUseCase>(LogoutUseCase());
 }

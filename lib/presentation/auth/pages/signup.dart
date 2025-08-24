@@ -7,13 +7,33 @@ import 'package:ecommerce_app_with_flutter/presentation/auth/pages/signin.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class SignupPage extends StatelessWidget {
-  SignupPage({super.key});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
   final TextEditingController _firstNameCon = TextEditingController();
   final TextEditingController _lastNameCon = TextEditingController();
   final TextEditingController _emailCon = TextEditingController();
   final TextEditingController _passwordCon = TextEditingController();
+
+  // Validation state
+  String? _firstNameError;
+  String? _lastNameError;
+  String? _emailError;
+  String? _passwordError;
+
+  @override
+  void dispose() {
+    _firstNameCon.dispose();
+    _lastNameCon.dispose();
+    _emailCon.dispose();
+    _passwordCon.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,14 +73,22 @@ class SignupPage extends StatelessWidget {
   Widget _firstNameField() {
     return TextField(
       controller: _firstNameCon,
-      decoration: const InputDecoration(hintText: 'Firstname'),
+      onChanged: (value) => _validateFirstName(value),
+      decoration: InputDecoration(
+        hintText: 'Firstname',
+        errorText: _firstNameError,
+      ),
     );
   }
 
   Widget _lastNameField() {
     return TextField(
       controller: _lastNameCon,
-      decoration: const InputDecoration(hintText: 'Lastname'),
+      onChanged: (value) => _validateLastName(value),
+      decoration: InputDecoration(
+        hintText: 'Lastname',
+        errorText: _lastNameError,
+      ),
     );
   }
 
@@ -69,7 +97,11 @@ class SignupPage extends StatelessWidget {
       controller: _emailCon,
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
-      decoration: const InputDecoration(hintText: 'Email Address'),
+      onChanged: (value) => _validateEmail(value),
+      decoration: InputDecoration(
+        hintText: 'Email Address',
+        errorText: _emailError,
+      ),
     );
   }
 
@@ -77,14 +109,18 @@ class SignupPage extends StatelessWidget {
     return TextField(
       controller: _passwordCon,
       obscureText: true,
-      decoration: const InputDecoration(hintText: 'Password'),
+      onChanged: (value) => _validatePassword(value),
+      decoration: InputDecoration(
+        hintText: 'Password',
+        errorText: _passwordError,
+      ),
     );
   }
 
   Widget _continueButton(BuildContext context) {
     return BasicAppButton(
       onPressed: () {
-        if (_validateForm(context)) {
+        if (_isFormValid()) {
           AppNavigator.push(
             context,
             GenderAndAgeSelectionPage(
@@ -102,62 +138,68 @@ class SignupPage extends StatelessWidget {
     );
   }
 
-  bool _validateForm(BuildContext context) {
-    // Check if any field is empty
-    if (_firstNameCon.text.trim().isEmpty) {
-      _showErrorSnackBar(context, 'First name is required');
-      return false;
-    }
-
-    if (_lastNameCon.text.trim().isEmpty) {
-      _showErrorSnackBar(context, 'Last name is required');
-      return false;
-    }
-
-    if (_emailCon.text.trim().isEmpty) {
-      _showErrorSnackBar(context, 'Email is required');
-      return false;
-    }
-
-    if (_passwordCon.text.isEmpty) {
-      _showErrorSnackBar(context, 'Password is required');
-      return false;
-    }
-
-    // Validate email format
-    if (!_isValidEmail(_emailCon.text.trim())) {
-      _showErrorSnackBar(context, 'Please enter a valid email address');
-      return false;
-    }
-
-    // Validate password strength
-    if (!_isValidPassword(_passwordCon.text)) {
-      _showErrorSnackBar(
-        context,
-        'Password must be at least 6 characters long',
-      );
-      return false;
-    }
-
-    return true;
+  // Real-time validation methods
+  void _validateFirstName(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        _firstNameError = 'First name is required';
+      } else {
+        _firstNameError = null;
+      }
+    });
   }
 
-  bool _isValidEmail(String email) {
+  void _validateLastName(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        _lastNameError = 'Last name is required';
+      } else {
+        _lastNameError = null;
+      }
+    });
+  }
+
+  void _validateEmail(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        _emailError = 'Email is required';
+      } else if (!_isValidEmailFormat(value.trim())) {
+        _emailError = 'Please enter a valid email address';
+      } else {
+        _emailError = null;
+      }
+    });
+  }
+
+  void _validatePassword(String value) {
+    setState(() {
+      if (value.isEmpty) {
+        _passwordError = 'Password is required';
+      } else if (!_isValidPasswordFormat(value)) {
+        _passwordError = 'Password must be at least 6 characters long';
+      } else {
+        _passwordError = null;
+      }
+    });
+  }
+
+  bool _isFormValid() {
+    return _firstNameError == null &&
+        _lastNameError == null &&
+        _emailError == null &&
+        _passwordError == null &&
+        _firstNameCon.text.trim().isNotEmpty &&
+        _lastNameCon.text.trim().isNotEmpty &&
+        _emailCon.text.trim().isNotEmpty &&
+        _passwordCon.text.isNotEmpty;
+  }
+
+  bool _isValidEmailFormat(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
-  bool _isValidPassword(String password) {
+  bool _isValidPasswordFormat(String password) {
     return password.length >= 6;
-  }
-
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.red,
-      ),
-    );
   }
 
   Widget _createAccount(BuildContext context) {

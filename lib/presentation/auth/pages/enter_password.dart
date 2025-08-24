@@ -11,10 +11,23 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class EnterPasswordPage extends StatelessWidget {
+class EnterPasswordPage extends StatefulWidget {
   final UserSigninReq signinReq;
-  EnterPasswordPage({super.key, required this.signinReq});
+  const EnterPasswordPage({super.key, required this.signinReq});
+
+  @override
+  State<EnterPasswordPage> createState() => _EnterPasswordPageState();
+}
+
+class _EnterPasswordPageState extends State<EnterPasswordPage> {
   final TextEditingController _passwordCon = TextEditingController();
+  String? _passwordError;
+
+  @override
+  void dispose() {
+    _passwordCon.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +79,11 @@ class EnterPasswordPage extends StatelessWidget {
     return TextField(
       controller: _passwordCon,
       obscureText: true,
-      decoration: InputDecoration(hintText: "Enter Password"),
+      onChanged: (value) => _validatePassword(value),
+      decoration: InputDecoration(
+        hintText: "Enter Password",
+        errorText: _passwordError,
+      ),
     );
   }
 
@@ -75,11 +92,11 @@ class EnterPasswordPage extends StatelessWidget {
       builder: (context) {
         return BasicReactiveButton(
           onPressed: () {
-            if (_validatePassword(context)) {
-              signinReq.password = _passwordCon.text;
+            if (_isFormValid()) {
+              widget.signinReq.password = _passwordCon.text;
               context.read<ButtonStateCubit>().execute(
                 usecase: SigninUseCase(),
-                params: signinReq,
+                params: widget.signinReq,
               );
             }
           },
@@ -89,25 +106,18 @@ class EnterPasswordPage extends StatelessWidget {
     );
   }
 
-  bool _validatePassword(BuildContext context) {
-    final password = _passwordCon.text;
-
-    if (password.isEmpty) {
-      _showErrorSnackBar(context, 'Password is required');
-      return false;
-    }
-
-    return true;
+  void _validatePassword(String value) {
+    setState(() {
+      if (value.isEmpty) {
+        _passwordError = 'Password is required';
+      } else {
+        _passwordError = null;
+      }
+    });
   }
 
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.red,
-      ),
-    );
+  bool _isFormValid() {
+    return _passwordError == null && _passwordCon.text.isNotEmpty;
   }
 
   Widget _forgotPassword(BuildContext context) {

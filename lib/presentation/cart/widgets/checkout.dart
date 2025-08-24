@@ -1,19 +1,15 @@
-
 import 'package:ecommerce_app_with_flutter/common/helpr/cart/cart.dart';
 import 'package:ecommerce_app_with_flutter/common/helpr/navigator/app_navigator.dart';
+import 'package:ecommerce_app_with_flutter/common/helpr/product/product_price.dart';
 import 'package:ecommerce_app_with_flutter/common/widget/button/basic_app_button.dart';
 import 'package:ecommerce_app_with_flutter/core/configs/theme/app_colors.dart';
 import 'package:ecommerce_app_with_flutter/domain/order/entity/product_ordered.dart';
 import 'package:ecommerce_app_with_flutter/presentation/cart/pages/checkout.dart';
 import 'package:flutter/material.dart';
 
-
 class Checkout extends StatelessWidget {
   final List<ProductOrderedEntity> products;
-  const Checkout({
-    required this.products,
-    super.key
-  });
+  const Checkout({required this.products, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,56 +25,40 @@ class Checkout extends StatelessWidget {
             children: [
               const Text(
                 'Subtotal',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16
-                ),
+                style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
               Text(
-                '\$${CartHelper.calculateCartSubtotal(products).toString()}',
+                ProductPriceHelper.formatPriceWithCurrency(
+                  CartHelper.calculateCartSubtotal(products),
+                ),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16
+                  fontSize: 16,
                 ),
-              )
+              ),
             ],
           ),
-             const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Shipping Cost',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16
-                ),
+                style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
               Text(
-                '\$8',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16
-                ),
-              )
+                ProductPriceHelper.formatPriceWithCurrency(8.0),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
             ],
           ),
-             const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text('Tax', style: TextStyle(color: Colors.grey, fontSize: 16)),
               Text(
-                'Tax',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16
-                ),
+                ProductPriceHelper.formatPriceWithCurrency(0.0),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
-              Text(
-                '\$0.0',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16
-                ),
-              )
             ],
           ),
           Row(
@@ -86,26 +66,25 @@ class Checkout extends StatelessWidget {
             children: [
               const Text(
                 'Total',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16
-                ),
+                style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
               Text(
-                '\$${CartHelper.calculateCartSubtotal(products) + 8 }',
+                ProductPriceHelper.formatPriceWithCurrency(
+                  CartHelper.calculateCartSubtotal(products) + 8,
+                ),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16
+                  fontSize: 16,
                 ),
-              )
+              ),
             ],
           ),
           BasicAppButton(
-            onPressed: (){
-              AppNavigator.push(context, CheckOutPage(products: products,));
+            onPressed: () {
+              AppNavigator.push(context, CheckOutPage(products: products));
             },
             title: 'Checkout',
-          )
+          ),
         ],
       ),
     );

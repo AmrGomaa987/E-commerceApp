@@ -1,4 +1,5 @@
 import 'package:ecommerce_app_with_flutter/common/helpr/navigator/app_navigator.dart';
+import 'package:ecommerce_app_with_flutter/common/helpr/product/product_price.dart';
 import 'package:ecommerce_app_with_flutter/domain/product/entity/product.dart';
 import 'package:ecommerce_app_with_flutter/presentation/product_detail/pages/product_detail.dart';
 import 'package:flutter/material.dart';
@@ -11,13 +12,14 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    if (productEntity.images.isNotEmpty) {
-    }
+    if (productEntity.images.isNotEmpty) {}
 
     return GestureDetector(
       onTap: () {
-        AppNavigator.push(context, ProductDetailPage(productEntity: productEntity,));
+        AppNavigator.push(
+          context,
+          ProductDetailPage(productEntity: productEntity),
+        );
       },
       child: Container(
         width: 180,
@@ -75,8 +77,12 @@ class ProductCard extends StatelessWidget {
                       children: [
                         Text(
                           productEntity.discountedPrice > 0
-                              ? "\$${productEntity.discountedPrice}"
-                              : "\$${productEntity.price}",
+                              ? ProductPriceHelper.formatPriceWithCurrency(
+                                  productEntity.discountedPrice.toDouble(),
+                                )
+                              : ProductPriceHelper.formatPriceWithCurrency(
+                                  productEntity.price.toDouble(),
+                                ),
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -85,7 +91,9 @@ class ProductCard extends StatelessWidget {
                         if (productEntity.discountedPrice > 0) ...[
                           const SizedBox(width: 8),
                           Text(
-                            "\$${productEntity.price}",
+                            ProductPriceHelper.formatPriceWithCurrency(
+                              productEntity.price.toDouble(),
+                            ),
                             style: const TextStyle(
                               fontSize: 10,
                               color: Colors.grey,

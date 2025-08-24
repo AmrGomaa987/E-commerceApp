@@ -10,4 +10,5 @@ abstract class AuthRepositry {
   Future<Either> sendPasswordResetEmail(String email);
   Future<bool> isLoggedIn();
   Future<Either> getUser();
+  Future<Either> logout();
 }
