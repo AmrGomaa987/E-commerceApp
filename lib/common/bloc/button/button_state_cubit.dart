@@ -7,30 +7,20 @@ import '../../../core/usecase/usecase.dart';
 class ButtonStateCubit extends Cubit<ButtonState> {
   ButtonStateCubit() : super(ButtonInitialState());
 
-
-  Future<void> execute({dynamic params,required UseCase usecase }) async {
+  Future<void> execute({dynamic params, required UseCase usecase}) async {
     emit(ButtonLoadingState());
     try {
       Either returnedData = await usecase.call(params: params);
       returnedData.fold(
         (error) {
-          emit(
-            ButtonFailureState(
-            errorMessage: error
-          )
-         );
+          emit(ButtonFailureState(errorMessage: error));
         },
         (data) {
-          emit(ButtonSuccessState());
-        }
+          emit(ButtonSuccessState(data: data));
+        },
       );
-
     } catch (e) {
-      emit(
-        ButtonFailureState(
-          errorMessage: e.toString()
-        )
-      );
+      emit(ButtonFailureState(errorMessage: e.toString()));
     }
   }
 }

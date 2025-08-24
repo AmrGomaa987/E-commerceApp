@@ -4,6 +4,8 @@ import 'package:ecommerce_app_with_flutter/data/category/repository/category.dar
 import 'package:ecommerce_app_with_flutter/data/category/source/category_firebase_service.dart';
 import 'package:ecommerce_app_with_flutter/data/order/repository/order.dart';
 import 'package:ecommerce_app_with_flutter/data/order/source/order_firebase_service.dart';
+import 'package:ecommerce_app_with_flutter/data/payment/repository/payment_repository_impl.dart';
+import 'package:ecommerce_app_with_flutter/data/payment/source/paymob_service.dart';
 import 'package:ecommerce_app_with_flutter/data/product/repository/product.dart';
 import 'package:ecommerce_app_with_flutter/data/product/source/product_firebase_service.dart';
 import 'package:ecommerce_app_with_flutter/domain/auth/repository/auth.dart';
@@ -21,6 +23,8 @@ import 'package:ecommerce_app_with_flutter/domain/order/usecases/get_cart_produc
 import 'package:ecommerce_app_with_flutter/domain/order/usecases/get_orders.dart';
 import 'package:ecommerce_app_with_flutter/domain/order/usecases/order_registration.dart';
 import 'package:ecommerce_app_with_flutter/domain/order/usecases/remove_cart_product.dart';
+import 'package:ecommerce_app_with_flutter/domain/payment/repository/payment_repository.dart';
+import 'package:ecommerce_app_with_flutter/domain/payment/usecases/process_payment.dart';
 import 'package:ecommerce_app_with_flutter/domain/product/repository/product.dart';
 import 'package:ecommerce_app_with_flutter/domain/product/usecases/add_or_remove_favorite_product.dart';
 import 'package:ecommerce_app_with_flutter/domain/product/usecases/get_favorties_products.dart';
@@ -36,21 +40,15 @@ Future<void> initializeDependancies() async {
   //services
   sl.registerSingleton<AuthFirebaseService>(AuthFirebaseServiceImpl());
   sl.registerSingleton<CategoryFirebaseService>(CategoryFirebaseServiceImpl());
-     sl.registerSingleton<ProductFirebaseService>(
-    ProductFirebaseServiceImpl()
-  );
-    sl.registerSingleton<OrderFirebaseService>(
-    OrderFirebaseServiceImpl()
-  );
+  sl.registerSingleton<ProductFirebaseService>(ProductFirebaseServiceImpl());
+  sl.registerSingleton<OrderFirebaseService>(OrderFirebaseServiceImpl());
+  sl.registerSingleton<PayMobService>(PayMobServiceImpl());
   //repositry
   sl.registerSingleton<AuthRepositry>(AuthRepositoryImpl());
   sl.registerSingleton<CategoryRepository>(CategoryRepositoryImpl());
-    sl.registerSingleton<ProductRepository>(
-    ProductRepositoryImpl()
-  );
-    sl.registerSingleton<OrderRepository>(
-    OrderRepositoryImpl()
-  );
+  sl.registerSingleton<ProductRepository>(ProductRepositoryImpl());
+  sl.registerSingleton<OrderRepository>(OrderRepositoryImpl());
+  sl.registerSingleton<PaymentRepository>(PaymentRepositoryImpl());
   //usecase
   sl.registerSingleton<SignupUseCase>(SignupUseCase());
   sl.registerSingleton<GetAgesUseCase>(GetAgesUseCase());
@@ -61,40 +59,23 @@ Future<void> initializeDependancies() async {
   sl.registerSingleton<IsLoggedInUseCase>(IsLoggedInUseCase());
   sl.registerSingleton<GetUserUseCase>(GetUserUseCase());
   sl.registerSingleton<GetCategoriesUseCase>(GetCategoriesUseCase());
-    sl.registerSingleton<GetTopSellingUseCase>(
-    GetTopSellingUseCase()
-  );
-    sl.registerSingleton<GetNewInUseCase>(
-    GetNewInUseCase()
-  );
+  sl.registerSingleton<GetTopSellingUseCase>(GetTopSellingUseCase());
+  sl.registerSingleton<GetNewInUseCase>(GetNewInUseCase());
   sl.registerSingleton<GetProductsByCategoryIdUseCase>(
-    GetProductsByCategoryIdUseCase()
+    GetProductsByCategoryIdUseCase(),
   );
-    sl.registerSingleton<GetProductsByTitleUseCase>(
-    GetProductsByTitleUseCase()
+  sl.registerSingleton<GetProductsByTitleUseCase>(GetProductsByTitleUseCase());
+  sl.registerSingleton<AddToCartUseCase>(AddToCartUseCase());
+  sl.registerSingleton<GetCartProductsUseCase>(GetCartProductsUseCase());
+  sl.registerSingleton<RemoveCartProductUseCase>(RemoveCartProductUseCase());
+  sl.registerSingleton<OrderRegistrationUseCase>(OrderRegistrationUseCase());
+  sl.registerSingleton<AddOrRemoveFavoriteProductUseCase>(
+    AddOrRemoveFavoriteProductUseCase(),
   );
-    sl.registerSingleton<AddToCartUseCase>(
-    AddToCartUseCase()
+  sl.registerSingleton<IsFavoriteUseCase>(IsFavoriteUseCase());
+  sl.registerSingleton<GetFavortiesProductsUseCase>(
+    GetFavortiesProductsUseCase(),
   );
-  sl.registerSingleton<GetCartProductsUseCase>(
-    GetCartProductsUseCase()
-  );
-    sl.registerSingleton<RemoveCartProductUseCase>(
-    RemoveCartProductUseCase()
-  );
-    sl.registerSingleton<OrderRegistrationUseCase>(
-    OrderRegistrationUseCase()
-  );
-   sl.registerSingleton<AddOrRemoveFavoriteProductUseCase>(
-    AddOrRemoveFavoriteProductUseCase()
-  );
-    sl.registerSingleton<IsFavoriteUseCase>(
-    IsFavoriteUseCase()
-  );
-     sl.registerSingleton<GetFavortiesProductsUseCase>(
-    GetFavortiesProductsUseCase()
-  );
-    sl.registerSingleton<GetOrdersUseCase>(
-    GetOrdersUseCase()
-  );
+  sl.registerSingleton<GetOrdersUseCase>(GetOrdersUseCase());
+  sl.registerSingleton<ProcessPaymentUseCase>(ProcessPaymentUseCase());
 }
