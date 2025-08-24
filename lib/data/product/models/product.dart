@@ -15,6 +15,9 @@ class ProductModel {
   final String productId;
   final int salesNumber;
   final String title;
+  final Map<String, int> inventory;
+  final int totalStock;
+  final int lowStockThreshold;
 
   ProductModel({
     required this.categoryId,
@@ -28,6 +31,9 @@ class ProductModel {
     required this.productId,
     required this.salesNumber,
     required this.title,
+    required this.inventory,
+    required this.totalStock,
+    required this.lowStockThreshold,
   });
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
@@ -47,6 +53,11 @@ class ProductModel {
       productId: map['productId'] as String? ?? '',
       salesNumber: map['salesNumber'] as int? ?? 0,
       title: map['title'] as String? ?? '',
+      inventory: map['inventory'] != null
+          ? Map<String, int>.from(map['inventory'])
+          : <String, int>{},
+      totalStock: map['totalStock'] as int? ?? 0,
+      lowStockThreshold: map['lowStockThreshold'] as int? ?? 5,
     );
   }
 
@@ -90,6 +101,9 @@ class ProductModel {
       'productId': productId,
       'salesNumber': salesNumber,
       'title': title,
+      'inventory': inventory,
+      'totalStock': totalStock,
+      'lowStockThreshold': lowStockThreshold,
     };
   }
 }
@@ -108,6 +122,9 @@ extension ProductXModel on ProductModel {
       productId: productId,
       salesNumber: salesNumber,
       title: title,
+      inventory: inventory,
+      totalStock: totalStock,
+      lowStockThreshold: lowStockThreshold,
     );
   }
 }
@@ -126,6 +143,9 @@ extension ProductXEntity on ProductEntity {
       productId: productId,
       salesNumber: salesNumber,
       title: title,
+      inventory: inventory,
+      totalStock: totalStock,
+      lowStockThreshold: lowStockThreshold,
     );
   }
 }
