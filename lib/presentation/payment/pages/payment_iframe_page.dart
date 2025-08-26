@@ -63,11 +63,9 @@ class _PaymentIframePageState extends State<PaymentIframePage> {
   }
 
   void _handleUrl(String url) {
-    print('🌐 _handleUrl called with: $url');
 
     // Prevent double execution
     if (_orderProcessed) {
-      print('⚠️ Order already processed, skipping...');
       return;
     }
 
@@ -79,12 +77,10 @@ class _PaymentIframePageState extends State<PaymentIframePage> {
     final success = uri.queryParameters['success'];
     final txnCode = uri.queryParameters['txn_response_code'];
 
-    print('💳 Payment status - success: $success, txnCode: $txnCode');
 
     if ((success == 'true' || success == '1') ||
         (txnCode == 'APPROVED' || txnCode == '0000')) {
       // Payment successful - register the order and clear cart
-      print('✅ Payment successful, processing order...');
       _orderProcessed = true; // Set flag to prevent double execution
       _registerOrderAndNavigateToSuccess();
     }
@@ -93,13 +89,11 @@ class _PaymentIframePageState extends State<PaymentIframePage> {
   }
 
   Future<void> _registerOrderAndNavigateToSuccess() async {
-    print('🎯 _registerOrderAndNavigateToSuccess called');
 
     // Double-check to prevent multiple executions (this should not happen due to flag in _handleUrl)
     if (!mounted) return;
 
     try {
-      print('🔄 Calling OrderRegistrationUseCase...');
       // Register the order (this will also clear the cart)
       final result = await sl<OrderRegistrationUseCase>().call(
         params: OrderRegistrationReq(

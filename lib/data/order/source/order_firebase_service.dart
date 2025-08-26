@@ -181,13 +181,10 @@ class OrderFirebaseServiceImpl extends OrderFirebaseService {
   @override
   Future<Either> orderRegistration(OrderRegistrationReq order) async {
     try {
-      print(
-        '🚀 OrderRegistration called for ${order.products.length} products',
-      );
+     
       var user = FirebaseAuth.instance.currentUser;
 
       // First, update inventory (deduct stock)
-      print('📦 Calling UpdateInventoryUseCase from orderRegistration...');
       var inventoryUpdateResult = await sl<UpdateInventoryUseCase>().call(
         params: UpdateInventoryParams(products: order.products),
       );

@@ -5,19 +5,41 @@ import 'package:ecommerce_app_with_flutter/presentation/cart/bloc/cart_products_
 
 import 'package:ecommerce_app_with_flutter/presentation/cart/widgets/checkout.dart';
 import 'package:ecommerce_app_with_flutter/presentation/cart/widgets/product_ordered_card.dart';
+import 'package:ecommerce_app_with_flutter/presentation/cart/widgets/grouped_product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/configs/assets/app_vectors.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  bool _isGroupedView = true; // Toggle between grouped and individual view
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BasicAppbar(title: Text('Cart')),
+      appBar: BasicAppbar(
+        title: const Text('Cart'),
+        action: IconButton(
+          onPressed: () {
+            setState(() {
+              _isGroupedView = !_isGroupedView;
+            });
+          },
+          icon: Icon(
+            _isGroupedView ? Icons.view_list : Icons.view_module,
+            color: Colors.white,
+          ),
+          tooltip: _isGroupedView ? 'Individual View' : 'Grouped View',
+        ),
+      ),
       body: BlocProvider(
         create: (context) => CartProductsDisplayCubit()..displayCartProducts(),
         child: BlocBuilder<CartProductsDisplayCubit, CartProductsDisplayState>(
@@ -49,6 +71,41 @@ class CartPage extends StatelessWidget {
   }
 
   Widget _products(List<ProductOrderedEntity> products) {
+    if (_isGroupedView) {
+      return _groupedProducts(products);
+    } else {
+      return _individualProducts(products);
+    }
+  }
+
+  Widget _groupedProducts(List<ProductOrderedEntity> products) {
+    // Group products by productId
+    Map<String, List<ProductOrderedEntity>> groupedProducts = {};
+    for (var product in products) {
+      if (groupedProducts.containsKey(product.productId)) {
+        groupedProducts[product.productId]!.add(product);
+      } else {
+        groupedProducts[product.productId] = [product];
+      }
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: groupedProducts.length,
+      itemBuilder: (context, index) {
+        String productId = groupedProducts.keys.elementAt(index);
+        List<ProductOrderedEntity> variants = groupedProducts[productId]!;
+
+        return GroupedProductCard(
+          productId: productId,
+          variants: variants,
+          cubit: context.read<CartProductsDisplayCubit>(),
+        );
+      },
+    );
+  }
+
+  Widget _individualProducts(List<ProductOrderedEntity> products) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) {
