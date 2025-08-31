@@ -55,7 +55,10 @@ class AddToBag extends StatelessWidget {
                 totalPrice:
                     ProductPriceHelper.provideCurrentPrice(productEntity) *
                     context.read<ProductQuantityCubit>().state,
-                productImage: productEntity.images[0],
+                productImage: _getImageForSelectedColor(
+                  productEntity,
+                  context.read<ProductColorSelectionCubit>().selectedIndex,
+                ),
                 createdDate: DateTime.now().toString(),
               ),
             );
@@ -91,5 +94,23 @@ class AddToBag extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getImageForSelectedColor(
+    ProductEntity productEntity,
+    int selectedIndex,
+  ) {
+    // Ensure the selectedIndex is within bounds of the images array
+    if (selectedIndex >= 0 && selectedIndex < productEntity.images.length) {
+      return productEntity.images[selectedIndex];
+    }
+
+    // Fallback to first image if index is out of bounds
+    if (productEntity.images.isNotEmpty) {
+      return productEntity.images[0];
+    }
+
+    // Ultimate fallback - empty string (should not happen in normal cases)
+    return '';
   }
 }

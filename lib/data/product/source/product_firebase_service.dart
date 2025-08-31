@@ -149,8 +149,33 @@ class ProductFirebaseServiceImpl extends ProductFirebaseService {
 
       var productData = productDoc.docs.first.data();
       var inventory = Map<String, int>.from(productData['inventory'] ?? {});
-      String variantKey = '${params.color}-${params.size}';
+
+      // Clean the color and size parameters (trim whitespace and normalize case)
+      String cleanColor = params.color.trim();
+      String cleanSize = params.size.trim();
+      String variantKey = '$cleanColor-$cleanSize';
+
+      // Debug: Print available inventory keys and the key we're looking for
+
+      // Try exact match first
       int availableStock = inventory[variantKey] ?? 0;
+
+      // If exact match fails, try case-insensitive search
+      if (availableStock == 0) {
+        String? matchingKey = inventory.keys.firstWhere(
+          (key) => key.toLowerCase() == variantKey.toLowerCase(),
+          orElse: () => '',
+        );
+
+        if (matchingKey.isNotEmpty) {
+          availableStock = inventory[matchingKey] ?? 0;
+          print(
+            '✅ Found case-insensitive match: $matchingKey = $availableStock',
+          );
+        } else {
+          print('❌ No matching variant found for: $variantKey');
+        }
+      }
 
       if (availableStock >= params.requestedQuantity) {
         return Right({
@@ -194,8 +219,23 @@ class ProductFirebaseServiceImpl extends ProductFirebaseService {
           var productData = productDoc.data();
           var inventory = Map<String, int>.from(productData['inventory'] ?? {});
 
-          String variantKey = '${product.productColor}-${product.productSize}';
+          // Clean the color and size parameters (trim whitespace)
+          String cleanColor = product.productColor.trim();
+          String cleanSize = product.productSize.trim();
+          String variantKey = '$cleanColor-$cleanSize';
+
+          // Try exact match first, then case-insensitive
           int currentStock = inventory[variantKey] ?? 0;
+          if (currentStock == 0) {
+            String? matchingKey = inventory.keys.firstWhere(
+              (key) => key.toLowerCase() == variantKey.toLowerCase(),
+              orElse: () => '',
+            );
+            if (matchingKey.isNotEmpty) {
+              variantKey = matchingKey; // Use the actual key from Firebase
+              currentStock = inventory[variantKey] ?? 0;
+            }
+          }
           int newStock = currentStock - product.productQuantity;
 
           // Ensure stock doesn't go negative

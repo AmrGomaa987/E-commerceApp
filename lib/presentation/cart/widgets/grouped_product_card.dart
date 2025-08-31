@@ -4,7 +4,7 @@ import 'package:ecommerce_app_with_flutter/domain/order/entity/product_ordered.d
 import 'package:ecommerce_app_with_flutter/presentation/cart/bloc/cart_products_display_cubit.dart';
 import 'package:flutter/material.dart';
 
-class GroupedProductCard extends StatelessWidget {
+class GroupedProductCard extends StatefulWidget {
   final String productId;
   final List<ProductOrderedEntity> variants;
   final CartProductsDisplayCubit cubit;
@@ -17,16 +17,34 @@ class GroupedProductCard extends StatelessWidget {
   });
 
   @override
+  State<GroupedProductCard> createState() => _GroupedProductCardState();
+}
+
+class _GroupedProductCardState extends State<GroupedProductCard> {
+  String? selectedColor;
+  String currentImageUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with the first variant's color and image
+    if (widget.variants.isNotEmpty) {
+      selectedColor = widget.variants.first.productColor;
+      currentImageUrl = widget.variants.first.productImage;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Use the first variant for common product info
-    final firstVariant = variants.first;
+    final firstVariant = widget.variants.first;
 
     // Calculate total quantity and price for all variants
-    final totalQuantity = variants.fold<int>(
+    final totalQuantity = widget.variants.fold<int>(
       0,
       (sum, variant) => sum + variant.productQuantity,
     );
-    final totalPrice = variants.fold<double>(
+    final totalPrice = widget.variants.fold<double>(
       0.0,
       (sum, variant) => sum + variant.totalPrice,
     );
@@ -45,18 +63,51 @@ class GroupedProductCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Product image
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(firstVariant.productImage),
+              // Product image with color selection
+              Column(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        currentImageUrl,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                  : null,
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.grey,
+                              size: 30,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                  const SizedBox(height: 8),
+                  // Color selection dots
+                  _buildColorSelector(),
+                ],
               ),
               const SizedBox(width: 12),
               // Product info
@@ -112,13 +163,185 @@ class GroupedProductCard extends StatelessWidget {
           const SizedBox(height: 16),
           // Variants list
           Column(
-            children: variants
+            children: widget.variants
                 .map((variant) => _buildVariantRow(context, variant))
                 .toList(),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildColorSelector() {
+    // Get unique colors from variants
+    Set<String> uniqueColors = widget.variants
+        .map((v) => v.productColor)
+        .toSet();
+
+    if (uniqueColors.length <= 1) {
+      return const SizedBox.shrink(); // Hide if only one color
+    }
+
+    return Column(
+      children: [
+        const Text(
+          'Colors',
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: uniqueColors.map((color) {
+            bool isSelected =
+                selectedColor?.toLowerCase() == color.toLowerCase();
+
+            return GestureDetector(
+              onTap: () => _onColorSelected(color),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: isSelected ? 20 : 16,
+                height: isSelected ? 20 : 16,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                decoration: BoxDecoration(
+                  color: _getColorFromName(color),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.withValues(alpha: 0.5),
+                    width: isSelected ? 3 : 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: isSelected
+                    ? const Icon(Icons.check, size: 12, color: Colors.white)
+                    : null,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  void _onColorSelected(String color) {
+    setState(() {
+      selectedColor = color;
+      // Find a variant with this color to get the image
+      final variantWithColor = widget.variants.firstWhere(
+        (variant) => variant.productColor.toLowerCase() == color.toLowerCase(),
+        orElse: () => widget.variants.first,
+      );
+
+      // Use the image from the variant, but also try to get the correct image
+      // based on color index if the variant has the wrong image
+      currentImageUrl = _getCorrectImageForColor(color, variantWithColor);
+    });
+  }
+
+  String _getCorrectImageForColor(
+    String color,
+    ProductOrderedEntity fallbackVariant,
+  ) {
+    // First, try to find a variant with the exact color match
+    final exactMatch = widget.variants.firstWhere(
+      (variant) => variant.productColor.toLowerCase() == color.toLowerCase(),
+      orElse: () => fallbackVariant,
+    );
+
+    // If we found an exact match and it has a valid image, use it
+    if (exactMatch.productImage.isNotEmpty) {
+      return exactMatch.productImage;
+    }
+
+    // Try to find the correct image based on color index as fallback
+    final colorIndex = _getColorIndex(color);
+    if (colorIndex >= 0) {
+      final allImages = widget.variants
+          .map((v) => v.productImage)
+          .where((img) => img.isNotEmpty)
+          .toSet()
+          .toList();
+
+      if (colorIndex < allImages.length) {
+        return allImages[colorIndex];
+      }
+    }
+
+    // Final fallback to the variant's image or first available image
+    if (fallbackVariant.productImage.isNotEmpty) {
+      return fallbackVariant.productImage;
+    }
+
+    // Last resort - use any available image
+    final anyImage = widget.variants
+        .map((v) => v.productImage)
+        .where((img) => img.isNotEmpty)
+        .firstOrNull;
+
+    return anyImage ?? '';
+  }
+
+  int _getColorIndex(String color) {
+    // Map colors to their expected index based on your Firebase structure
+    switch (color.toLowerCase()) {
+      case 'orange':
+        return 0;
+      case 'white':
+        return 1;
+      case 'blue':
+        return 2;
+      case 'red':
+        return 3;
+      case 'green':
+        return 4;
+      case 'black':
+        return 5;
+      default:
+        return -1;
+    }
+  }
+
+  Color _getColorFromName(String colorName) {
+    switch (colorName.toLowerCase()) {
+      case 'orange':
+        return const Color(0xFFEC6D26);
+      case 'white':
+        return const Color(0xFFFFFFFF);
+      case 'blue':
+        return const Color(0xFF4468E5);
+      case 'red':
+        return const Color(0xFFFF0000);
+      case 'green':
+        return const Color(0xFF00FF00);
+      case 'black':
+        return const Color(0xFF000000);
+      case 'yellow':
+        return const Color(0xFFFFFF00);
+      case 'purple':
+        return const Color(0xFF800080);
+      case 'pink':
+        return const Color(0xFFFFC0CB);
+      case 'brown':
+        return const Color(0xFFA52A2A);
+      case 'grey':
+      case 'gray':
+        return const Color(0xFF808080);
+      default:
+        return Colors.grey; // Default color for unknown colors
+    }
   }
 
   Widget _buildVariantRow(BuildContext context, ProductOrderedEntity variant) {
@@ -218,7 +441,7 @@ class GroupedProductCard extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       if (variant.productQuantity > 1) {
-                        cubit.updateQuantity(
+                        widget.cubit.updateQuantity(
                           variant,
                           variant.productQuantity - 1,
                         );
@@ -264,7 +487,7 @@ class GroupedProductCard extends StatelessWidget {
                   // Increase button
                   GestureDetector(
                     onTap: () {
-                      cubit.updateQuantity(
+                      widget.cubit.updateQuantity(
                         variant,
                         variant.productQuantity + 1,
                       );
@@ -287,7 +510,7 @@ class GroupedProductCard extends StatelessWidget {
                   // Delete this variant button
                   GestureDetector(
                     onTap: () {
-                      cubit.removeProduct(variant);
+                      widget.cubit.removeProduct(variant);
                     },
                     child: Container(
                       width: 24,
@@ -327,7 +550,7 @@ class GroupedProductCard extends StatelessWidget {
             style: TextStyle(color: Colors.white),
           ),
           content: Text(
-            'Remove all variants of "${variants.first.productTitle}" from cart?',
+            'Remove all variants of "${widget.variants.first.productTitle}" from cart?',
             style: const TextStyle(color: Colors.grey),
           ),
           actions: [
@@ -339,8 +562,8 @@ class GroupedProductCard extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
                 // Remove all variants
-                for (var variant in variants) {
-                  cubit.removeProduct(variant);
+                for (var variant in widget.variants) {
+                  widget.cubit.removeProduct(variant);
                 }
               },
               child: const Text('Remove', style: TextStyle(color: Colors.red)),
